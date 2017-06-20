@@ -1,0 +1,22 @@
+{
+  "name": "steam-node",
+  "version": "0.0.0",
+  "description": "SteamNode",
+  "main": "server.js",
+  "author": {
+    "name": "Aleksander"
+  },
+  "dependencies": {
+    "cleverbot.io": "^1.0.4",
+    "mathjs": "^3.13.3",
+    "request": "^2.81.0",
+    "steam-tradeoffer-manager": "^2.7.1",
+    "steam-user": "^3.21.3",
+    "steamcommunity": "^3.30.7",
+    "utf8": "^2.1.2",
+    "winston": "^2.3.1"
+  },
+  "scripts": {
+    "start": "node server"
+  }
+}
