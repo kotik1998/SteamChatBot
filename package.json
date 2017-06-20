@@ -4,7 +4,7 @@
   "description": "SteamNode",
   "main": "server.js",
   "author": {
-    "name": "Aleksander"
+    "name": "Qasde"
   },
   "dependencies": {
     "cleverbot.io": "^1.0.4",
