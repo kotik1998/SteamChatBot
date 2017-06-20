@@ -10,7 +10,7 @@ var request = require('request');                               // Request html 
 var mathjs = require('mathjs');                                 // Math.eval,simplify
 var config = require('./config.js');                            // Config file, !!! change it to json !!!
 if (config.cleverbot.user) {
-var bot = new cleverbot(config.cleverbot.user, config.cleverbot.key);
+    var bot = new cleverbot(config.cleverbot.user, config.cleverbot.key);
     bot.setNick('SteamNodeBotRoom');
     bot.create((err, session) => {
         if (err) {
