@@ -40,7 +40,7 @@ var questionAnswers = [
     'Never',//
 ];
 
-var insultList = [
+var insultList = [ // TBH i will probably delete this,I don't like it and it wasn't my idea to add this anyway
     [`Fuck you `, '!'],
     ['', ' smells like trash.'],
     ['', ' you mom gay.'],
