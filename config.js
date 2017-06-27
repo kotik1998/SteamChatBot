@@ -1,9 +1,9 @@
 ﻿var config = {
     account: [
-        /*{
+        {
             username: "",
             password: ""
-        }*//*,
+        }/*,
         {
             username: "",
             password: ""
