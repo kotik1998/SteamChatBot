@@ -480,7 +480,7 @@ function initializeClient(login) {
 
                 logger.info(`[${login.username}] recieved "/group" command ${this.client.users[userID64].player_name} (${userID64})`);
 
-                this.client.inviteToGroup(userID64, ${config.group});
+                this.client.inviteToGroup(userID64, config.group);
                 
 
         //status
