@@ -41,30 +41,7 @@ var questionAnswers = [
     'Never'
 ];
 
-<<<<<<< HEAD
 var logger = new Winston.Logger({
-=======
-var insultList = [ // TBH i will probably delete this,I don't like it and it wasn't my idea to add this anyway
-    [`Fuck you `, '!'],
-    ['', ' smells like trash.'],
-    ['', ' you mom gay.'],
-    ['', ' is a clinking, clanking, clattering collection of caliginous junk.'],
-    ['', ' is nothing. If he was in my toilet I wouldn\'t bother flushing it.'],
-    ['', ' is a meat-headed shit sack'],
-    ['Best part of ', ' ran down the crack of his momma’s ass and ended up as a brown stain on the mattress'],
-    ['End your life ', '.'],
-    ['',' is a one ugly motherfucker.'],
-    ['',' is so ugly he could be a modern art masterpiece.'],
-    ['Scuse me ', ', is that your nose or did a bus park on your face?'],
-    ['','? More like the abortion that lived.'],
-    ['', ', you miserable shit eating autist, how do you live knowing you will never change?'],
-    ['',' should clone himself, so he can fuck himself.'],
-    //['',' is a no business, born insecure junkyard mother fucker.'],
-
-];
-
-var logger = new Winston.Logger({                               // Setup new logger
->>>>>>> 574d99a868a3a99dbfc08964e91cfa2650cf5e90
     transports: [
         new Winston.transports.Console({
             colorize: true,
@@ -462,13 +439,7 @@ function initializeClient(login) {
 
                 logger.info(`[${login.username}] recieved "/group" command ${this.client.users[userID64].player_name} (${userID64})`);
 
-<<<<<<< HEAD
                 this.client.inviteToGroup(userID64, config.group);
-=======
-                //this.client.inviteToGroup(userID64, config.group);
->>>>>>> 574d99a868a3a99dbfc08964e91cfa2650cf5e90
-                
-
         //status
             } else if (message.startsWith('/status') && chats[chatID].commandStatus.status) {
                 
