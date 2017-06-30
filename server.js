@@ -25,6 +25,7 @@ var note = {}; // note object
 var chats = {}; // chat settings object
 var client = []; // Array of client objects
 var chatInterval = {};
+var BotID = [];
 
 var questionAnswers = [
     'Yes',
@@ -37,10 +38,10 @@ var questionAnswers = [
     'I don\'t know',
     'Unlikely',
     'Most likely',
-    'Never',//
+    'Never'
 ];
 
-var logger = new Winston.Logger({                               // Setup new logger
+var logger = new Winston.Logger({
     transports: [
         new Winston.transports.Console({
             colorize: true,
@@ -146,6 +147,11 @@ function initializeClient(login) {
     // Entered group chat
     this.client.on('chatEnter', (chatID, response) => {
 
+        for (var i in steamIDs) {
+            if (this.chats[chatID].members.hasOwnProperty(i))
+                this.client.leaveChat(chatID);
+        }
+
         if (chats.hasOwnProperty(chatID)) {
             this.client.chatMessage(chatID, 'Hi!');
             if (!(chatInterval.hasOwnProperty(chatID)))
@@ -154,7 +160,7 @@ function initializeClient(login) {
         } else {
             this.client.chatMessage(chatID, 'Hi! This is first time i was invited to this chat!\nIf you need any help use /help\nIf somebody invted me to your group and you dont want any bots in your group ask mod or admin to use /leavechat and/or /leavegroup (admin only) or i will just leave when i dont recieve any command for 48 hours');
             chats[chatID] = new ChatProperties();
-            chatInterval[chatID] = setInterval(() => { this.GroupTimer(chatID) }, 7200000); //7200000
+            //chatInterval[chatID] = setInterval(() => { this.GroupTimer(chatID) }, 7200000); //7200000
             fs.writeFile('chats.json', JSON.stringify(chats).replace(/[\u007F-\uFFFF]/g, (chr) => {
                 return "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).substr(-4)
             }), (err) => {
@@ -328,7 +334,6 @@ function initializeClient(login) {
                     this.client.chatMessage(chatID, `I choose ${choice}`);
                     logger.info(`[${login.username}] Recieved "/choose" command. user: ${this.client.users[userID].player_name} (${userID})`);
 
-
                 } else {
 
                     this.client.chatMessage(chatID, 'I don\'t think you understand how this works.');
@@ -347,19 +352,17 @@ function initializeClient(login) {
                 logger.info(`[${login.username}] Recieved "/define" (${message}) command. user: ${this.client.users[userID].player_name} (${userID})`);
 
                 var word = message.substring(8);
-                
-                got(`http://api.urbandictionary.com/v0/define?term=${word}`).then(response => {
-                            
-                            var definition = JSON.parse(response.body);
-                            if (definition.result_type === 'exact') {
-                                this.client.chatMessage(chatID, `${definition.list[0].word}.: ${definition.list[0].definition}`);
-                            } else {
-                                this.client.chatMessage(chatID, 'Definition not found.');
-                            }
-                }).catch(
-		    logger.info(`[$login.username] /define error: ${error.response.body}`));
-		}
 
+                got(`http://api.urbandictionary.com/v0/define?term=${word}`).then(response => {
+
+                    var definition = JSON.parse(response.body);
+                    if (definition.result_type === 'exact') {
+                        this.client.chatMessage(chatID, `${definition.list[0].word}.: ${definition.list[0].definition}`);
+                    } else {
+                        this.client.chatMessage(chatID, 'Definition not found.');
+                    }
+                }).catch(
+                    logger.info(`[$login.username] /define error: ${error.response.body}`));
 
         //"Clever"bot
             } else if (message.toLowerCase().startsWith('/b ') && chats[chatID].commandStatus.bot) {
@@ -631,7 +634,7 @@ function initializeClient(login) {
                     var result = 'Are you sure you entered everything correctly?';
                 }
                 this.client.chatMessage(chatID, result);
-	//randnum
+	    //randnum
             } else if (message.toLowerCase().startsWith('/randnum ') && chats[chatID].commandStatus.randnum) {
 
                 if (!(this.CheckPermissionCommand(chatID, 'randnum', senderRank)))
@@ -647,7 +650,7 @@ function initializeClient(login) {
                     var number = Math.floor(Math.random() * parseInt(number[1]));
                     this.client.chatMessage(chatID, number.toString());
                 }
-	//lock
+	    //lock
             } else if (message.toLowerCase() === '/lock' && chats[chatID].commandStatus.lock) {
 
                 if (!(this.CheckPermissionCommand(chatID, 'lock', senderRank)))
@@ -660,7 +663,7 @@ function initializeClient(login) {
                 } else {
                     this.client.setChatPrivate(chatID);
                 }
-	//unlock
+	    //unlock
             } else if (message.toLowerCase() === '/unlock' && chats[chatID].commandStatus.lock) {
 
                 if (!(this.CheckPermissionCommand(chatID, 'lock', senderRank)))
@@ -678,8 +681,8 @@ function initializeClient(login) {
                     var title = response.body.match(/<title>(.*?)<\/title>/);
                     this.client.chatMessage(chatID, title[1]);
                 }).catch(error => {
-		    logger.error(`[${login.username}] ${error.response.body}`);
-		}
+                    logger.error(`[${login.username}] ${error.response.body}`);
+                });
             }
         }
     });
@@ -729,6 +732,9 @@ function initializeClient(login) {
             logger.info(`[${login.username}] Kicked from gorup: ${groupID}`);
         }
 
+        if (this.client.myGroups.length > 900) {
+
+        }
     });
 
     this.client.on('newComments', () => {
@@ -794,23 +800,28 @@ function initializeClient(login) {
         return false;
     }
 
-    this.GroupTimer = (chatID) => {
+    /*this.GroupTimer = (chatID) => {
         var time = new Date();
 
 
-	if (!(this.client.chats.hasOwnProperty(chatID))
-	    return;
-	    
+        if (!(this.client.chats.hasOwnProperty(chatID)))
+            return;
+
         if (time.getTime() - chats[chatID].lastCommandTime > config.chatTime * 1000) {
-            if (this.client.chats.hasOwnProperty(chatID) && this.client.chats[chatID].hasOwnProperty('permissionLevel') && this.client.chats[chatID].permissionLevel > 1) 
+            if (this.client.chats.hasOwnProperty(chatID) && this.client.chats[chatID].hasOwnProperty('permissionLevel') && this.client.chats[chatID].permissionLevel > 1)
                 return;
-            
+
             clearInterval(chatInterval[chatID]);
             this.client.leaveChat(chatID);
             this.community.leaveGroup(chatID);
             delete chats[chatID];
             delete chatInterval[chatID];
         }
+    }*/
+
+    this.CheckGroupCount = () => {
+
+
     }
 
     this.ResetTimer = (chatID, command) => {
