@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "cleverbot.io": "^1.0.4",
+    "got": "^7.0.0",
     "mathjs": "^3.13.3",
     "request": "^2.81.0",
     "steam-tradeoffer-manager": "^2.7.1",

@@ -3,14 +3,14 @@ var Winston = require('winston');                               // Saving logs a
 var SteamUser = require('steam-user');                          // Steam client
 var Community = require('steamcommunity');                      // Steam Community
 var TradeOfferManager = require('steam-tradeoffer-manager');    // Steam tradeoffer manager
+var got = require('got');
 var cleverbot = require('cleverbot.io');                        // CleverBot
 var fs = require('fs');                                         // Files System
 var util = require('util');                                     // Util, not used atm, only for debuging
-var request = require('request');                               // Request html from a website
 var mathjs = require('mathjs');                                 // Math.eval,simplify
 var config = require('./config.js');                            // Config file, !!! change it to json !!!
 if (config.cleverbot.user) {
-var bot = new cleverbot(config.cleverbot.user, config.cleverbot.key);
+    var bot = new cleverbot(config.cleverbot.user, config.cleverbot.key);
     bot.setNick('SteamNodeBotRoom');
     bot.create((err, session) => {
         if (err) {
@@ -38,25 +38,6 @@ var questionAnswers = [
     'Unlikely',
     'Most likely',
     'Never',//
-];
-
-var insultList = [
-    [`Fuck you `, '!'],
-    ['', ' smells like trash.'],
-    ['', ' you mom gay.'],
-    ['', ' is a clinking, clanking, clattering collection of caliginous junk.'],
-    ['', ' is nothing. If he was in my toilet I wouldn\'t bother flushing it.'],
-    ['', ' is a meat-headed shit sack'],
-    ['Best part of ', ' ran down the crack of his momma’s ass and ended up as a brown stain on the mattress'],
-    ['End your life ', '.'],
-    ['',' is a one ugly motherfucker.'],
-    ['',' is so ugly he could be a modern art masterpiece.'],
-    ['Scuse me ', ', is that your nose or did a bus park on your face?'],
-    ['','? More like the abortion that lived.'],
-    ['', ', you miserable shit eating autist, how do you live knowing you will never change?'],
-    ['',' should clone himself, so he can fuck himself.'],
-    //['',' is a no business, born insecure junkyard mother fucker.'],
-
 ];
 
 var logger = new Winston.Logger({                               // Setup new logger
@@ -366,24 +347,19 @@ function initializeClient(login) {
                 logger.info(`[${login.username}] Recieved "/define" (${message}) command. user: ${this.client.users[userID].player_name} (${userID})`);
 
                 var word = message.substring(8);
-                try {
-                    request(`http://api.urbandictionary.com/v0/define?term=${word}`, (err, response, body) => {
-                        if (err) {
-                            logger.error(`[${login.username}] ${err}`);
-                        } else {
-                            var definition = JSON.parse(body);
+                
+                got(`http://api.urbandictionary.com/v0/define?term=${word}`).then(response => {
+                            
+                            var definition = JSON.parse(response.body);
                             if (definition.result_type === 'exact') {
                                 this.client.chatMessage(chatID, `${definition.list[0].word}.: ${definition.list[0].definition}`);
                             } else {
                                 this.client.chatMessage(chatID, 'Definition not found.');
                             }
-                        }
+                }).catch(
+		    logger.info(`[$login.username] /define error: ${error.response.body}`));
+		}
 
-                    });
-                }
-                catch (e) {
-                    logger.warn(`${login.username} some faggot tried to crash bot`);
-                }
 
         //"Clever"bot
             } else if (message.toLowerCase().startsWith('/b ') && chats[chatID].commandStatus.bot) {
@@ -399,7 +375,7 @@ function initializeClient(login) {
                         logger.error(`[${login.username}] ${err}`);
                     } else {
 
-                        logger.info(`[${login.username}] Recieved "/b" (${message}) command. user: ${this.client.users[userID64].player_name} (${userID64})`);
+                        logger.info(`[${login.username}] Recieved /b command (${message}) command. user: ${this.client.users[userID64].player_name} (${userID64})`);
 
                         this.client.chatMessage(chatID, response);
                     }
@@ -417,26 +393,6 @@ function initializeClient(login) {
                 logger.info(`[${login.username}] Recieved "/hug" command. user: ${this.client.users[userID64].player_name} (${userID64})`);
 
                 this.client.chatMessage(chatID, `*Hugs ${this.client.users[userID64].player_name} <3*`);
-
-        //insult
-            } else if (message.toLowerCase().startsWith('/insult') && chats[chatID].commandStatus.insult) {
-
-                if (!(this.CheckPermissionCommand(chatID, 'insult', senderRank)))
-                    return;
-                if (!(this.CheckTimeCommand(chatID, 'insult')))
-                    return;
-                this.ResetTimer(chatID, 'insult');
-
-                var target = message.match(/^\/insult (.+)/i);
-
-                var insult = insultList[Math.floor(Math.random() * insultList.length)];
-
-                if (target) {
-                    this.client.chatMessage(chatID, insult.join(target[1]));
-                } else {
-                    this.client.chatMessage(chatID, insult.join(this.client.users[userID64].player_name));
-                }
-
         //slap
             } else if (message.toLowerCase().startsWith('/slap') && chats[chatID].commandStatus.slap) {
 
@@ -480,7 +436,7 @@ function initializeClient(login) {
 
                 logger.info(`[${login.username}] recieved "/group" command ${this.client.users[userID64].player_name} (${userID64})`);
 
-                this.client.inviteToGroup(userID64, ${config.group});
+                this.client.inviteToGroup(userID64, config.group);
                 
 
         //status
@@ -665,28 +621,12 @@ function initializeClient(login) {
                 
                 message = message.substring(6);
 
+                if (message.includes(/[!:(range)]/i))
+		            return;
+		
                 var result = '';
                 try {
                     var result = mathjs.eval(message).toString();
-                } catch (e) {
-                    var result = 'Are you sure you entered everything correctly?';
-                }
-                this.client.chatMessage(chatID, result);
-        //simplify
-            } else if (message.toLowerCase().startsWith('/simplify ') && chats[chatID].commandStatus.simplify) {
-
-                if (!(this.CheckPermissionCommand(chatID, 'simplify', senderRank)))
-                    return;
-                if (!(this.CheckTimeCommand(chatID, 'simplify')))
-                    return;
-                this.ResetTimer(chatID, 'simplify');
-
-                logger.info(`[${login.username}] Recieved /simplify command (${message}), user: ${this.client.users[userID64].player_name} (${userID64})`);
-
-                message = message.substring(10);
-                var result = '';
-                try {
-                    var result = mathjs.simplify(message).toString();
                 } catch (e) {
                     var result = 'Are you sure you entered everything correctly?';
                 }
@@ -734,14 +674,12 @@ function initializeClient(login) {
         //youtube
             if ((message.toLowerCase().includes('https://youtu.be/') || message.toLowerCase().includes('www.youtube.com/watch?v=')) && chats[chatID].commandStatus.youtube) {
                 var link = message.match(/(https:\/\/youtu.be\/|https?:\/\/www.youtube.com\/watch\?v=)\S+/i);
-                request(link[0], (err, response, body) => {
-                    if (err) {
-                        logger.error(`[${login.username}] ${err}`);
-                    } else {
-                        var title = body.match(/<title>(.*?)<\/title>/);
-                        this.client.chatMessage(chatID, title[1]);
-                    }
-                });
+                got(link[0]).then(response => {
+                    var title = response.body.match(/<title>(.*?)<\/title>/);
+                    this.client.chatMessage(chatID, title[1]);
+                }).catch(error => {
+		    logger.error(`[${login.username}] ${error.response.body}`);
+		}
             }
         }
     });
@@ -858,6 +796,11 @@ function initializeClient(login) {
 
     this.GroupTimer = (chatID) => {
         var time = new Date();
+
+
+	if (!(this.client.chats.hasOwnProperty(chatID))
+	    return;
+	    
         if (time.getTime() - chats[chatID].lastCommandTime > config.chatTime * 1000) {
             if (this.client.chats.hasOwnProperty(chatID) && this.client.chats[chatID].hasOwnProperty('permissionLevel') && this.client.chats[chatID].permissionLevel > 1) 
                 return;
@@ -924,15 +867,13 @@ function ChatProperties() {
         greeting: true,
         help: true,
         hug: true,
-        insult: false,
         kick: true,
-	    lock: true,
+        lock: true,
         math: true,
         note: true,
         question: true,
-	    randnum: true,
+        randnum: true,
         random: true,
-        simplify: true,
         slap: true,
         status: true,
         valediction: true,
@@ -946,18 +887,16 @@ function ChatProperties() {
         define: 1,
         help: 0,
         hug: 1,
-        insult: 2,
         kick: 2,
         leavechat: 2,
         leavegroup: 3,
-	    lock: 2,
-        math: 5,
+        lock: 2,
+        math: 2,
         note: 1,
         question: 1,
-	    randnum: 1,
+        randnum: 1,
         random: 2,
         set: 3,
-        simplify: 2,
         slap: 2,
         status: 1,
         votekick: 1,
@@ -969,14 +908,12 @@ function ChatProperties() {
         define: 5,
         help: 20,
         hug: 1,
-        insult: 10,
         kick: 5,
         math: 5,
         note: 10,
         question: 5,
-	    randnum: 5,
+        randnum: 5,
         random: 3,
-        simplify: 10,
         slap: 10,
         status: 30
     };
@@ -986,14 +923,12 @@ function ChatProperties() {
         define: 0,
         help: 0,
         hug: 0,
-        insult: 0,
         kick: 0,
         math: 0,
         note: 0,
         question: 0,
-	    randnum: 0,
-	    random: 0,
-        simplify: 0,
+        randnum: 0,
+        random: 0,
         slap: 0,
         status: 0
     };

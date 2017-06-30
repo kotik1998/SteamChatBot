@@ -1,0 +1,2 @@
+C:\Users\Aleksander\Documents\Visual Studio 2017\Projects\SteamNode\SteamNode\obj\Debug\SteamNode.njsprojResolveAssemblyReference.cache
+C:\Users\Aleksander\Documents\Visual Studio 2017\Projects\SteamNode\SteamNode\bin\Microsoft.NodejsTools.WebRole.dll
