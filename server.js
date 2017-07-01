@@ -774,16 +774,18 @@ function initializeClient(login) {
     });
 // Other
     
-
-    fs.readFile(`Polldata${login.username}.json`, (err, data) => {                   // Save polldata for later sessions if crashed or something idk
-        if (err) {
-            logger.warn(`[${login.username}] Error reading Polldata.json. If this is the first run, this is expected behavior: ${err}`);
-        } else {
-            logger.debug(`[${login.username}] Found previous trade offer poll data. Importing it to keep running smoothly.`);
-            this.manager.pollData = JSON.parse(data);
-        }
-    });
-
+    try (
+        fs.readFile(`Polldata${login.username}.json`, (err, data) => {                   // Save polldata for later sessions if crashed or something idk
+            if (err) {
+                logger.warn(`[${login.username}] Error reading Polldata.json. If this is the first run, this is expected behavior: ${err}`);
+            } else {
+                logger.debug(`[${login.username}] Found previous trade offer poll data. Importing it to keep running smoothly.`);
+                this.manager.pollData = JSON.parse(data);
+            }
+        });
+    } catch (e) {
+        logger.warn(`[${login.username}] Error reading Polldata.json. If this is the first run, this is expected behavior: ${err}`);
+    }
 
     this.CheckPermissionCommand = (chatID, command, senderRank) => {
         if (chats[chatID].commandPermission[command] <= senderRank)
