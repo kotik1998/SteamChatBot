@@ -845,7 +845,6 @@ function initializeClient(login) {
 fs.readFile('Notes.json', (err, data) => {
     if (err) {
         logger.error(`Error reading notes file: ${err}`);
-        note = {};
     }
     note = JSON.parse(data);
 });
