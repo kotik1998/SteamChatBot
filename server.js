@@ -89,7 +89,7 @@ function initializeClient(login) {
         process.exit(1);
     });
 
-    this.client.on('webSession', (sessionID, cookies) => {               // Connected to Steam ommunity
+    this.client.on('webSession', (sessionID, cookies) => {               // Connected to Steam community
         logger.debug(`[${login.username}] Got a web session.`);
         this.manager.setCookies(cookies, (err) => {
             if (err) {
